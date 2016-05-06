@@ -28,6 +28,7 @@
 import rospy # ROS
 import json # to read in JSON config file
 from sar_robot_command_msgs.msg import RobotCommand # ROS msgs
+from sar_robot_command_msgs.msg import RobotState # ROS msgs
 
 # The SAR robot translation node subscribes to the robot_command topic and 
 # translates any robot commands received from the generic format to platform-
@@ -59,14 +60,23 @@ class robot_translation():
         rospy.init_node('robot_translation_node', anonymous=True)
         rospy.loginfo("Robot translation node starting up!")
 
-        # subscribe to /robot_command topic
-        rospy.Subscriber('robot_command', RobotCommand, robot_command_callback)
+        # subscribe to /robot_command topic to get command messages for the robot
+        rospy.Subscriber('robot_command', RobotCommand, self.on_robot_command_msg)
+
+        # subscribe to /robot_state topic to get status messages from the robot
+        rospy.Subscriber('robot_state', RobotState, self.on_robot_state_msg)
 
         # keep python from exiting until this node is stopped
         rospy.spin()
 
 
-    def robot_command_callback(data):
+    def on_robot_state_msg(data):
+        """ receive status messages from robots """
+        print(data)
+        # TODO do something with robot status messages?
+
+
+    def on_robot_command_msg(data):
         """ translate the robot command for the specific platform! """
         print(data)
 
@@ -102,14 +112,8 @@ class robot_translation():
         print("TODO send to other robot!")
 
 
+
 if __name__ == '__main__':
     # run the node!
-    try:
         node = robot_translation()
         node.run_robot_translation_node()
-
-    # if roscore isn't running or shuts down unexpectedly
-    except rospy.ROSInterruptException: 
-        print ('ROS node shutdown')
-        pass
-
