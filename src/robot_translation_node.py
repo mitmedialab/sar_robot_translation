@@ -140,6 +140,10 @@ class robot_translation():
         # messages, but since it doesn't, the current workaround is
         # to generate and send what we hope are unique IDs appended
         # to the beginning of each message string.
+        #
+        # Some people may provide a unique ID as part of an incoming
+        # RobotCommand message, so if one is provided, we use that 
+        # instead of generating our own.
         # 
         # Note that the built-in python hash function may not produce
         # identical results across systems -- e.g., it may produce
@@ -147,7 +151,10 @@ class robot_translation():
         # suffice here because we don't care about other people being
         # able to generate the same hashes -- this node just needs to
         # be able to generate the same hash each time.
-        message = "[" + hash(data.properties) + "] " + properties
+        if not data.id:
+            message = "[" + str(hash(data.properties)) + "] " + properties
+        else:
+            message = "[" + data.id + "] " + properties 
 
         # TODO add message string with the ID to the CoRDial message
 
