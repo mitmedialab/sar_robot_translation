@@ -60,11 +60,33 @@ class robot_translation():
         rospy.init_node('robot_translation_node', anonymous=True)
         rospy.loginfo("Robot translation node starting up!")
 
-        # subscribe to /robot_command topic to get command messages for the robot
-        rospy.Subscriber('robot_command', RobotCommand, self.on_robot_command_msg)
+        # subscribe to /robot_command topic to get command messages
+        # for the robot
+        rospy.Subscriber('robot_command', RobotCommand,
+                self.on_robot_command_msg)
 
-        # subscribe to /robot_state topic to get status messages from the robot
+        # subscribe to /robot_state topic to get status messages from
+        # the robot
         rospy.Subscriber('robot_state', RobotState, self.on_robot_state_msg)
+
+        # publish to robot-specific topic to pass commands to robots
+        # if robot is jibo...
+        if (self.which-robot == 'JIBO'):
+            pass
+            # TODO what topic and what message type for Jibo?
+            #self.jibo_pub = rospy.Publisher('jibo_command', JiboMessage,
+                    #queue_size = 10)
+        # if robot is a SPRITE robot...
+        elif (self.which-robot == 'SPRITEBOT'):
+            pass
+            # TODO what topic and what message type for SPRITE robots?
+            #self.sprite_pub = rospy.Publisher('sprite_command', SpriteMessage,
+                    #queue_size = 10)
+        # fill in for any other robots
+        #elif (self.which-robot == 'OTHER_ROBOT'):
+            # TODO what topic and what message type for other robot?
+            #self.other_pub = rospy.Publisher('other_command', OtherMessage,
+                    #queue_size = 10)
 
         # keep python from exiting until this node is stopped
         rospy.spin()
@@ -80,7 +102,7 @@ class robot_translation():
         """ translate the robot command for the specific platform! """
         print(data)
 
-        # TODO check that data is valid (once we finish defining command format!)
+        # TODO check that data is valid after we finalize command format!
 
         # pass command in platform-specific way
         # send to jibo...
@@ -89,26 +111,64 @@ class robot_translation():
         # send to spritebot...
         elif (self.which-robot == 'SPRITEBOT'):
             self.send_to_spritebot(data)
-        # send to other robot...
-        elif (self.which-robot == 'OTHER_ROBOT'):
-            self.send_to_other_robot(data)
+        # fill in for any other robots:
+        #elif (self.which-robot == 'OTHER_ROBOT'):
+            #self.send_to_other_robot(data)
 
 
-    def send_to_spritebot(data):
-        """ translate robot command to format spritebot uses """
-        # TODO send command to spritebot
-        print("TODO send to spritebot!")
+    def send_to_sprite(data):
+        """ translate robot command to format SPRITE robot uses """
+        # TODO send command to SPRITE robot
+        print("TODO send to sprite robot!")
+
+        # TODO create ROS message that will be sent to the SPRITE
+        # robot
+        #msg = CoRDialMessage() # TODO what kind of rosmsg?
+
+        # TODO does it need a header? If so add imports
+        # add header
+        #msg.header = Header()
+        #msg.header.stamp = rospy.Time.now()
+
+        # SPRITE robots use the CoRDial system to manage speech and
+        # behavior. CoRDial requires each message have a unique ID
+        # string, so we generate one. Any time we see the same string
+        # message, we want to generate the same ID, so that IDs are
+        # uniquely paired with messages. CoRDial uses this ID to
+        # cache robot speech and behavior. Ideally, CoRDial would be
+        # generating and tracking its own unique keys when it caches
+        # messages, but since it doesn't, the current workaround is
+        # to generate and send what we hope are unique IDs appended
+        # to the beginning of each message string.
+        # 
+        # Note that the built-in python hash function may not produce
+        # identical results across systems -- e.g., it may produce
+        # different hashes on 32-bit versus 64-bit systems. It will
+        # suffice here because we don't care about other people being
+        # able to generate the same hashes -- this node just needs to
+        # be able to generate the same hash each time.
+        message = "[" + hash(data.properties) + "] " + properties
+
+        # TODO add message string with the ID to the CoRDial message
+
+        # TODO send message - what topic?
+        #self.cordial_topic.publish(msg)
+        #rospy.loginfo(msg)
 
     
     def send_to_jibo(data):
         """ translate robot command to format jibo uses """
         # TODO send command to jibo
         print("TODO send to jibo!")
+
+        # TODO create message to send
+        # TODO fill message with data from RobotCommand
+        # TODO send message
     
 
     def send_to_other_robot(data):
         """ translate robot command to format other robot uses """
-        # TODO send command to other robot
+        # fill in to send commands to any other robot
         print("TODO send to other robot!")
 
 
