@@ -20,9 +20,9 @@ program expects the configuration file to be called
 "robot\_translation\_config.json". The configuration includes the following
 options:
 
-- which-robot: This ROS node will translate the generic robot commands received
-  into platform-specific robot commands for the robot indicated here, e.g.,
-  JIBO or SPRITE.
+- which\_robot: This ROS node will translate the generic robot commands
+  received into platform-specific robot commands for the robot indicated here.
+  Available robot types include: JIBO, SPRITE, SIMULATED.
 
 If roscore is not running, the program will print a message saying that it is
 unable to register with the master node, and will keep trying to connect.

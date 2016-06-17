@@ -1,5 +1,10 @@
+# ignore json config files except for the example
+*.json
+!*.example.json
+
 # vim/gvim swap files
 *.swp
+*.swo
 
 # ignore all OS generated files
 .DS_Store*
@@ -121,5 +126,3 @@ qtcreator-*
 
 # Catkin custom files
 CATKIN_IGNORE
-
-

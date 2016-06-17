@@ -29,6 +29,7 @@ import rospy # ROS
 import json # to read in JSON config file
 from sar_robot_command_msgs.msg import RobotCommand # ROS msgs
 from sar_robot_command_msgs.msg import RobotState # ROS msgs
+from std_msgs.msg import Header # standard ROS Header
 
 # The SAR robot translation node subscribes to the robot_command topic and 
 # translates any robot commands received from the generic format to platform-
@@ -43,13 +44,13 @@ class robot_translation():
         try:
             with open ("robot_translation_config.json") as json_file:
                 json_data = json.load(json_file)
-            print(json_data)
-            self.which_robot = json_data['which-robot']
+            rospy.loginfo("Got config:\n" + str(json_data))
+            self.which_robot = json_data['which_robot']
         except ValueError as e:
-            print('Error! Could not open or parse json config file!'
+            rospy.logerr('Error! Could not open or parse json config file!'
                 + '\n  Did you use valid json?\nError: %s' % e)
         except IOError as e:
-            print('Error! Could not open or could not parse json '
+            rospy.logerr('Error! Could not open or could not parse json '
                    +'config file!\n  Does the file exist in this directory?'
                    + '\nError: %s' % e)
 
@@ -58,32 +59,45 @@ class robot_translation():
         """ wait for robot commands and pass them on """
         # start ros node
         rospy.init_node('robot_translation_node', anonymous=True)
-        rospy.loginfo("Robot translation node starting up!")
+        rospy.loginfo("Robot translation node starting up! Configured to send "
+               "to " + self.which_robot + " robot.")
 
         # subscribe to /robot_command topic to get command messages
         # for the robot
         rospy.Subscriber('robot_command', RobotCommand,
                 self.on_robot_command_msg)
+        rospy.loginfo("Subscribed to 'robot_command' topic.")
 
         # subscribe to /robot_state topic to get status messages from
         # the robot
         rospy.Subscriber('robot_state', RobotState, self.on_robot_state_msg)
+        rospy.loginfo("Subscribed to 'robot_state' topic.")
 
         # publish to robot-specific topic to pass commands to robots
         # if robot is jibo...
-        if (self.which-robot == 'JIBO'):
+        if (self.which_robot == 'JIBO'):
             pass
             # TODO what topic and what message type for Jibo?
             #self.jibo_pub = rospy.Publisher('jibo_command', JiboMessage,
                     #queue_size = 10)
+            #rospy.loginfo("Will publish to 'jibo_command' topic.")
+
         # if robot is a SPRITE robot...
-        elif (self.which-robot == 'SPRITEBOT'):
+        elif (self.which_robot == 'SPRITE'):
             pass
             # TODO what topic and what message type for SPRITE robots?
             #self.sprite_pub = rospy.Publisher('sprite_command', SpriteMessage,
                     #queue_size = 10)
+            #rospy.loginfo("Will publish to 'sprite_command' topic.")
+
+        # if robot is a simulated robot...
+        elif (self.which_robot == 'SIMULATED'):
+            self.robot_sim_pub = rospy.Publisher('robot_sim_command', 
+                    RobotCommand, queue_size = 10)
+            rospy.loginfo("Will publish to 'robot_sim_command' topic.")
+
         # fill in for any other robots
-        #elif (self.which-robot == 'OTHER_ROBOT'):
+        #elif (self.which_robot == 'OTHER_ROBOT'):
             # TODO what topic and what message type for other robot?
             #self.other_pub = rospy.Publisher('other_command', OtherMessage,
                     #queue_size = 10)
@@ -92,34 +106,37 @@ class robot_translation():
         rospy.spin()
 
 
-    def on_robot_state_msg(data):
-        """ receive status messages from robots """
-        print(data)
+    def on_robot_state_msg(self, data):
+        """ Receive status messages from robots """
+        rospy.loginfo("Got message:\n" + str(data))
         # TODO do something with robot status messages?
 
 
-    def on_robot_command_msg(data):
-        """ translate the robot command for the specific platform! """
-        print(data)
+    def on_robot_command_msg(self, data):
+        """ Translate the robot command for the specific platform! """
+        rospy.loginfo("Got message:\n" + str(data))
 
         # TODO check that data is valid after we finalize command format!
 
         # pass command in platform-specific way
-        # send to jibo...
-        if (self.which-robot == 'JIBO'):
+        # send to Jibo...
+        if (self.which_robot == 'JIBO'):
             self.send_to_jibo(data)
-        # send to spritebot...
-        elif (self.which-robot == 'SPRITEBOT'):
-            self.send_to_spritebot(data)
+        # send to SPRITE robot...
+        elif (self.which_robot == 'SPRITE'):
+            self.send_to_sprite(data)
+        # send to simulated robot...
+        elif (self.which_robot == 'SIMULATED'):
+            self.send_to_simulated(data)
         # fill in for any other robots:
-        #elif (self.which-robot == 'OTHER_ROBOT'):
+        #elif (self.which_robot == 'OTHER_ROBOT'):
             #self.send_to_other_robot(data)
 
 
-    def send_to_sprite(data):
-        """ translate robot command to format SPRITE robot uses """
+    def send_to_sprite(self, data):
+        """ Translate robot command to format SPRITE robot uses """
         # TODO send command to SPRITE robot
-        print("TODO send to sprite robot!")
+        rospy.logwarn("TODO send to sprite robot!")
 
         # TODO create ROS message that will be sent to the SPRITE
         # robot
@@ -163,24 +180,38 @@ class robot_translation():
         #rospy.loginfo(msg)
 
     
-    def send_to_jibo(data):
-        """ translate robot command to format jibo uses """
+    def send_to_jibo(self, data):
+        """ Translate robot command to format Jibo uses """
         # TODO send command to jibo
-        print("TODO send to jibo!")
+        rospy.logwarn("TODO send to jibo!")
 
         # TODO create message to send
         # TODO fill message with data from RobotCommand
         # TODO send message
     
 
-    def send_to_other_robot(data):
-        """ translate robot command to format other robot uses """
-        # fill in to send commands to any other robot
-        print("TODO send to other robot!")
+    def send_to_simulated(self, data):
+        """ Translate robot command to format simulated robot uses """
+        # Simulated robot just gets standard RobotCommand messages
+        msg = RobotCommand()
+        # add header
+        msg.header = Header()
+        msg.header.stamp = rospy.Time.now()
+        # add message content
+        msg.command = data.command
+        msg.properties = data.properties
+        # send message
+        self.robot_sim_pub.publish(msg)
+        rospy.loginfo("Forwarding message to simulated robot:\n" + str(msg))
 
+
+    def send_to_other_robot(self, data):
+        """ Translate robot command to format other robot uses """
+        # fill in to send commands to other robot
+        rospy.logwarn("TODO send to other robot!")
 
 
 if __name__ == '__main__':
     # run the node!
-        node = robot_translation()
-        node.run_robot_translation_node()
+    node = robot_translation()
+    node.run_robot_translation_node()

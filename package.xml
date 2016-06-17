@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>sar_robot_translation</name>
+  <version>0.1.0</version>
+  <description>Translates a generic robot command to platform-specific robot commands</description>
+
+  <maintainer email="jakory@media.mit.edu">jakory</maintainer>
+  <license>MIT</license>
+  <url type="website">https://github.com/personal-robots/sar_robot_translation</url>
+  <author email="jakory@media.mit.edu">jakory</author> 
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>rospy</build_depend>
+  <run_depend>rospy</run_depend>
+
+</package>
