@@ -6,17 +6,17 @@
 # The MIT License (MIT)
 #
 # Copyright (c) 2016 Personal Robots Group
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -31,7 +31,7 @@ from sar_robot_command_msgs.msg import RobotCommand # ROS msgs
 from sar_robot_command_msgs.msg import RobotState # ROS msgs
 from std_msgs.msg import Header # standard ROS Header
 
-# The SAR robot translation node subscribes to the robot_command topic and 
+# The SAR robot translation node subscribes to the robot_command topic and
 # translates any robot commands received from the generic format to platform-
 # specific commands that are sent to the specific robot being used (specified
 # in the config file).
@@ -45,7 +45,14 @@ class robot_translation():
             with open ("robot_translation_config.json") as json_file:
                 json_data = json.load(json_file)
             rospy.loginfo("Got config:\n" + str(json_data))
-            self.which_robot = json_data['which_robot']
+            if ("which_robot" in json_data):
+                self.which_robot = json_data["which_robot"]
+                rospy.loginfo("Found which robot: " + self.which_robot)
+            else:
+                rospy.loginfo("Could not read which robot to use! Expected "
+                    + "option \"which_robot\" to be in the config file. "
+                    + "Defaulting to SIMULATED robot.")
+                self.which_robot = "SIMULATED"
         except ValueError as e:
             rospy.logerr('Error! Could not open or parse json config file!'
                 + '\n  Did you use valid json?\nError: %s' % e)
@@ -92,7 +99,7 @@ class robot_translation():
 
         # if robot is a simulated robot...
         elif (self.which_robot == 'SIMULATED'):
-            self.robot_sim_pub = rospy.Publisher('robot_sim_command', 
+            self.robot_sim_pub = rospy.Publisher('robot_sim_command',
                     RobotCommand, queue_size = 10)
             rospy.loginfo("Will publish to 'robot_sim_command' topic.")
 
@@ -159,9 +166,9 @@ class robot_translation():
         # to the beginning of each message string.
         #
         # Some people may provide a unique ID as part of an incoming
-        # RobotCommand message, so if one is provided, we use that 
+        # RobotCommand message, so if one is provided, we use that
         # instead of generating our own.
-        # 
+        #
         # Note that the built-in python hash function may not produce
         # identical results across systems -- e.g., it may produce
         # different hashes on 32-bit versus 64-bit systems. It will
@@ -171,7 +178,7 @@ class robot_translation():
         if not data.id:
             message = "[" + str(hash(data.properties)) + "] " + properties
         else:
-            message = "[" + data.id + "] " + properties 
+            message = "[" + data.id + "] " + properties
 
         # TODO add message string with the ID to the CoRDial message
 
@@ -179,7 +186,7 @@ class robot_translation():
         #self.cordial_topic.publish(msg)
         #rospy.loginfo(msg)
 
-    
+
     def send_to_jibo(self, data):
         """ Translate robot command to format Jibo uses """
         # TODO send command to jibo
@@ -188,7 +195,7 @@ class robot_translation():
         # TODO create message to send
         # TODO fill message with data from RobotCommand
         # TODO send message
-    
+
 
     def send_to_simulated(self, data):
         """ Translate robot command to format simulated robot uses """

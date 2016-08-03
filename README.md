@@ -1,4 +1,4 @@
-# sar\_robot\_translation 
+# sar\_robot\_translation
 
 SAR Robot Translation is a ROS node that translates generic robot commands to
 platform-specific robot commands.
@@ -10,7 +10,7 @@ robot\_translation\_node.py file:
 
 `./robot_translation_node.py`
 
-or 
+or
 
 `python robot_translation_node.py`
 
@@ -46,7 +46,7 @@ See
 ### Robot-specific messages
 
 The program will publish messages to robot-specific topics depending on which
-robot is set in the configuration file. 
+robot is set in the configuration file.
 
 TODO: Determine message types and ROS topic names for each robot platform.
 
@@ -54,7 +54,7 @@ TODO: Determine message types and ROS topic names for each robot platform.
 
 This program was built and tested with:
 
-- Python 2.7.6 
+- Python 2.7.6
 - ROS Indigo
 - sar\_robot\_command\_msgs 1.0.0
 - Ubuntu 14.04 LTS (64-bit)
