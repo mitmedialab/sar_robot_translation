@@ -43,12 +43,15 @@ See
 [sar\_robot\_command\_msgs](https://github.com/personal-robots/sar_robot_command_msgs
 "sar_robot_command_msgs") for more info about these messages.
 
+
+
 ### Robot-specific messages
 
-The program will publish messages to robot-specific topics depending on which
-robot is set in the configuration file.
+The program will publish and subscribe to robot-specific topics depending on
+which robot is set in the configuration file.
 
-TODO: Determine message types and ROS topic names for each robot platform.
+TODO: Determine message types and ROS topic names for each robot platform, and
+list here.
 
 ## Version and dependency notes
 
